@@ -1,16 +1,25 @@
+
 ###Define variables
 cards = [2,3,4,5,6,7,8,9,10,"J","Q","K","A"]; #the value each card
+suits = ["H", "C", "S", "D"]                  #suits
+$suit_deck = (suits*13*4).shuffle                       #suits * number of cards per deck * number of decks
 full_deck = cards*4;                          #4 sets of cards in one deck
-deck = full_deck*4                            #number of decks
+deck = full_deck*4                            #number of decks, currently using 4
 $deck = deck.shuffle!
 
 $player_hand = []
+$player_suit = []
 dealer_hand = []
+dealer_suit = []
 
 $player_hand << $deck.pop                       #Two cards for each player
+$player_suit << $suit_deck.pop
 dealer_hand << $deck.pop
+dealer_suit << $suit_deck.pop
 $player_hand << $deck.pop
+$player_suit << $suit_deck.pop
 dealer_hand << $deck.pop
+dealer_suit << $suit_deck.pop
 
 ###Define Methods
 def hand_value(hand)
@@ -34,14 +43,15 @@ def hand_value(hand)
   total
 end
 
-def dealer_plays(hand)
+def dealer_plays(hand, suit)
   puts ""
-  puts "And these are the dealer's cards: #{hand[0]},#{hand[1]}"
+  puts "And these are the dealer's cards: #{suit[0]}#{hand[0]}, #{suit[1]}#{hand[1]}"
   puts "Dealer has #{hand_value hand}."
 
   while (hand_value hand) < 17
     hand << $deck.pop
-    puts "Dealer gets a #{hand.last}. Now he has #{hand}"
+    suit << $suit_deck.pop
+    puts "Dealer gets a #{suit.last}#{hand.last}. Now he has #{suit.zip(hand)}"
     puts "Dealer has #{hand_value hand}."
   end
 
@@ -66,8 +76,8 @@ end
 puts "Let's play some Black Jack!"
 puts "What's your name, dude?"
 name = gets.chomp.capitalize
-puts "Hi #{name}!. These are your cards: #{$player_hand[0]},#{$player_hand[1]}"
-puts "And these are the dealer's cards: *,#{dealer_hand[1]}"
+puts "Hi #{name}!. These are your cards: #{$player_suit[0]}#{$player_hand[0]}, #{$player_suit[1]}#{$player_hand[1]}"
+puts "And these are the dealer's cards: *,#{dealer_suit[1]}#{dealer_hand[1]}"
 if (hand_value $player_hand) == 21  #you have 21
   puts "That's 21! Nice!"
   action = "stay"
@@ -78,7 +88,8 @@ end
 while action
   if action == "hit"
     $player_hand << $deck.pop    #you draw a card
-    puts "You get a #{$player_hand.last}. Now you have #{$player_hand}"
+    $player_suit << $suit_deck.pop
+    puts "You get a #{$player_suit.last}#{$player_hand.last}. Now you have #{$player_suit.zip($player_hand)}"
 
     if (hand_value $player_hand) > 21    #you lose
       puts "Over 21! Busted!"
@@ -93,7 +104,7 @@ while action
     end
 
   elsif action == "stay"     #you are fine with your total
-    dealer_plays(dealer_hand)
+    dealer_plays(dealer_hand, dealer_suit)
   else
     puts "Say what?"         #you didn't say hit or stay
     action = gets.chomp.downcase
